@@ -4,27 +4,36 @@ var game = new Phaser.Game(800, 600, Phaser.CANVAS, '',
 
 
 // main state
-function MainState(game, speed){
+function MainState(game, speed, level, color){
     var moveDone = false;
+    var points = 0;
     var cursors;
     var snake=[];
     var direction = 1;
     var cherry;
+    var map;
+    var layer;
     this.speed = speed;
 
     this.preload = function(){
         game.load.image('block', 'assets/block.png');
         game.load.image('cherry', 'assets/cherry.png');
+        game.load.tilemap(level, "assets/levels/"+level+".json", null, Phaser.Tilemap.TILED_JSON);
+        game.load.image("tiles", "assets/levels/"+color+".png", 20, 20);
     };
 
     this.create = function(){
+        map = game.add.tilemap(level);
+        map.addTilesetImage(color, "tiles");
+        layer = map.createLayer("walls");
+        layer.resizeWorld();
+
         game.stage.backgroundColor = '#6688ee';
-        head = game.add.sprite(200, 200, 'block');
+        head = game.add.sprite(200, 0, 'block');
         snake.push(head);
         snakeInit(5);
 
         createCherry();
-
         cursors = game.input.keyboard.createCursorKeys();
         game.time.events.loop(Phaser.Timer.SECOND/this.speed, moveSnake, this);
 
@@ -37,6 +46,7 @@ function MainState(game, speed){
         if (moveDone == true){
             handleCursors();
         }
+
         detectCollision();
     };
 
@@ -44,8 +54,22 @@ function MainState(game, speed){
         var blockWidth = snake[0].width;
         var gridWidth = game.width/blockWidth;
         var gridHeight = game.height/blockWidth;
-        cherry = game.add.sprite(game.rnd.integerInRange(0, gridWidth-blockWidth)*blockWidth,
-            game.rnd.integerInRange(0, gridHeight-blockWidth)*blockWidth, 'cherry');
+        do {
+            cherry = game.add.sprite(game.rnd.integerInRange(0, gridWidth-1)*blockWidth,
+                game.rnd.integerInRange(0, gridHeight-1)*blockWidth, 'cherry');
+            if (map.getTile(cherry.x/cherry.width, cherry.y/cherry.width)!==null || checkCherryOverlap()){
+                cherry.destroy();
+            }
+        } while (map.getTile(cherry.x/cherry.width, cherry.y/cherry.width)!==null || checkCherryOverlap())
+    }
+
+    function checkCherryOverlap(){
+        snake.forEach(function(block){
+            if (checkOverlap(cherry, block)===true){
+                return true;
+            }
+        })
+        return false;
     }
 
     function checkOverlap(spriteA, spriteB) {
@@ -65,7 +89,7 @@ function MainState(game, speed){
 
     function snakeInit(length){
         for (var i = 1; i < length; i++){
-            var b = game.add.sprite(200-snake[0].width*i, 200, 'block');
+            var b = game.add.sprite(200-snake[0].width*i, 0, 'block');
             snake.push(b);
         }
     }
@@ -88,11 +112,6 @@ function MainState(game, speed){
 
     function detectCollision(){
         var collided = false;
-        if (snake[0].x < 0 || snake[0].y < 0 || snake[0].x >= game.world.width || snake[0].y >= game.world.height){
-            snake=[];
-            direction = 1;
-            game.state.start('MenuState');
-        }
         snake.slice(1).forEach(function(block){
             if (collided === false){
                 if (checkOverlap(snake[0], block)){
@@ -103,18 +122,38 @@ function MainState(game, speed){
                 }
             }
         });
+        if (collided === false){
+            if (map.getTile(snake[0].x/snake[0].width, snake[0].y/snake[0].width)!==null){
+                snake=[];
+                direction = 1;
+                game.state.start('MenuState');
+                collided = true;
+            }
+            else if (snake[0].x < 0 || snake[0].y < 0 || snake[0].x >= game.world.width || snake[0].y >= game.world.height){
+                snake=[];
+                direction = 1;
+                game.state.start('MenuState');
+            }
+        }
     }
 
     function handleCursors(){
-        if (cursors.right.isDown && direction!== 3)
+        if (cursors.right.isDown && direction!== 3){
             direction = 1;
-        else if (cursors.down.isDown && direction!== 4)
+            moveDone = false;
+        }
+        else if (cursors.down.isDown && direction!== 4){
             direction = 2;
-        else if (cursors.left.isDown && direction!== 1)
+            moveDone = false;
+        }
+        else if (cursors.left.isDown && direction!== 1){
             direction = 3;
-        else if (cursors.up.isDown && direction!== 2)
+            moveDone = false;
+        }
+        else if (cursors.up.isDown && direction!== 2){
             direction = 4;
-        moveDone = false;
+            moveDone = false;
+        }
     }
 
 
@@ -136,7 +175,7 @@ function MenuState(game){
 
 
 
-var mainState = new MainState(game, 20);
+var mainState = new MainState(game, 4, "level2", "lightBlue");
 game.state.add('MainState', mainState);
 game.state.add('MenuState', MenuState);
 
