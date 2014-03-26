@@ -2,18 +2,20 @@
 var game = new Phaser.Game(800, 600, Phaser.CANVAS, '',
     { preload: preload, create: create, update: update });
 
-
 // main state
-function MainState(game, speed, level, color){
+function MainState(game, speed, level, color, background){
     var moveDone = false;
-    var points = 0;
     var cursors;
     var snake=[];
     var direction = 1;
     var cherry;
     var map;
     var layer;
+    var snakeLength;
+    var lengthText;
+    this.level = level;
     this.speed = speed;
+    this.background = background;
 
     this.preload = function(){
         game.load.image('block', 'assets/block.png');
@@ -28,10 +30,12 @@ function MainState(game, speed, level, color){
         layer = map.createLayer("walls");
         layer.resizeWorld();
 
-        game.stage.backgroundColor = '#6688ee';
+        game.stage.backgroundColor = this.background;
         head = game.add.sprite(200, 0, 'block');
         snake.push(head);
-        snakeInit(5);
+        snakeInit(4);
+        snakeLength = 5;
+        createLengthText();
 
         createCherry();
         cursors = game.input.keyboard.createCursorKeys();
@@ -40,15 +44,61 @@ function MainState(game, speed, level, color){
     };
 
     this.update = function(){
+
         if (checkOverlap(snake[0], cherry)){
             eatCherry();
         }
         if (moveDone == true){
             handleCursors();
         }
+        if (snakeLength === 6){
+            var graphics = game.add.graphics(0,0);
+            graphics.beginFill("0x"+this.background.substr(1), 0.2);
+            graphics.drawRect(0, 0, game.width, game.height);
+
+            createWinText(parseInt(this.level.substr(this.level.length-1)));
+            game.time.events.add(Phaser.Timer.SECOND * 3, transitionNextLevel, this);
+
+            return;
+        }
 
         detectCollision();
+
     };
+
+    this.render = function(){
+        lengthText.text ='length: ' + snakeLength;
+    }
+
+    function transitionNextLevel(){
+        var nextLevel = parseInt(this.level.substr(this.level.length-1))+1;
+        game.state.start('Level'+ nextLevel);
+    }
+
+    function createWinText(level){
+        level = level + 1;
+        var winText = game.add.text(game.world.centerX, 250, 'You Win!',
+            {fill: "#ffffff", align: "center"});
+        winText.font = 'Arial Black';
+        winText.fontSize = 50;
+        winText.anchor.set(0.5);
+
+        var description = game.add.text(game.world.centerX, 350, 'Next Level: '+level+
+            '\nStarting in 3 seconds',
+            {fill: "#ffffff", align: "center"});
+        description.font = 'Arial';
+        description.fontSize = 30;
+        description.anchor.set(0.5);
+    }
+
+    function createLengthText(){
+        lengthText = game.add.text(game.world.centerX, 10, 'length: '+ snakeLength,
+            {fill: "#ffffff", align: "center"});
+        lengthText.font = 'Arial';
+        lengthText.fontSize = 25;
+        lengthText.alpha = 0.8;
+        lengthText.anchor.set(0.5);
+    }
 
     function createCherry(){
         var blockWidth = snake[0].width;
@@ -85,6 +135,7 @@ function MainState(game, speed, level, color){
         var tail = snake[snake.length-1];
         b = game.add.sprite(tail.x, tail.y, 'block');
         snake.push(b);
+        snakeLength+=1;
     }
 
     function snakeInit(length){
@@ -162,21 +213,43 @@ function MainState(game, speed, level, color){
 
 // menu state
 function MenuState(game){
+
     this.create = function(){
-        var menu = game.add.text(game.width/2, 400, '- click to start -',
-            { font: "40px Arial", fill: "#ffffff", align: "center" });
-        game.input.onDown.add(startMain, this);
+        game.stage.backgroundColor = "#6688ee";
+        var title = game.add.text(game.world.centerX, 250, 'PHASER\nSNAKE',
+            {fill: "#ffffff", align: "center"});
+        title.font = 'Arial Black';
+        title.fontSize = 50;
+        title.fontWeight = "bold";
+        title.anchor.set(0.5);
+
+        var description = game.add.text(game.world.centerX, 400, 'press UP key to start',
+            {fill: "#ffffff", align: "center"});
+        description.font = 'Arial';
+        description.fontSize = 30;
+        description.anchor.set(0.5);
+
+
+    };
+
+    this.update = function(){
+        if (game.input.keyboard.isDown(Phaser.Keyboard.UP))
+        {
+            startMain();
+        }
     };
     function startMain(){
-        game.state.start('MainState');
+        game.state.start('Level1');
     }
 
 };
 
 
 
-var mainState = new MainState(game, 4, "level2", "lightBlue");
-game.state.add('MainState', mainState);
+game.level1 = new MainState(game, 10, "level1", "yellow", "#aaaaaa");
+game.level2 = new MainState(game, 10, "level2", "lightBlue", "#6688ee")
+game.state.add('Level1', game.level1);
+game.state.add('Level2', game.level2);
 game.state.add('MenuState', MenuState);
 
 
@@ -185,6 +258,7 @@ function preload(){
 
 }
 function create(){
+
     game.state.start('MenuState');
 }
 
