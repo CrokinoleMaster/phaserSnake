@@ -1,5 +1,5 @@
 
-var game = new Phaser.Game(800, 600, Phaser.CANVAS, "snake",
+var game = new Phaser.Game(800, 600, Phaser.AUTO, "snake",
     { preload: preload, create: create, update: update });
 
 // main state
