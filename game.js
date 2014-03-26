@@ -3,7 +3,7 @@ var game = new Phaser.Game(800, 600, Phaser.CANVAS, '',
     { preload: preload, create: create, update: update });
 
 // main state
-function MainState(game, speed, level, color, background){
+function MainState(game, speed, level, background, textColor) {
     var moveDone = false;
     var cursors;
     var snake=[];
@@ -21,12 +21,12 @@ function MainState(game, speed, level, color, background){
         game.load.image('block', 'assets/block.png');
         game.load.image('cherry', 'assets/cherry.png');
         game.load.tilemap(level, "assets/levels/"+level+".json", null, Phaser.Tilemap.TILED_JSON);
-        game.load.image("tiles", "assets/levels/"+color+".png", 20, 20);
+        game.load.image("tiles", "assets/levels/"+level+".png", 20, 20);
     };
 
     this.create = function(){
         map = game.add.tilemap(level);
-        map.addTilesetImage(color, "tiles");
+        map.addTilesetImage("wall", "tiles");
         layer = map.createLayer("walls");
         layer.resizeWorld();
 
@@ -52,11 +52,14 @@ function MainState(game, speed, level, color, background){
             handleCursors();
         }
         if (snakeLength === 6){
+            var level = parseInt(this.level.substr(this.level.length-1));
+            var nextLevel = level+1;
             var graphics = game.add.graphics(0,0);
             graphics.beginFill("0x"+this.background.substr(1), 0.2);
             graphics.drawRect(0, 0, game.width, game.height);
 
-            createWinText(parseInt(this.level.substr(this.level.length-1)));
+            window.localStorage.setItem('level', 'level'+nextLevel);
+            createWinText(level);
             game.time.events.add(Phaser.Timer.SECOND * 3, transitionNextLevel, this);
 
             return;
@@ -68,35 +71,34 @@ function MainState(game, speed, level, color, background){
 
     this.render = function(){
         lengthText.text ='length: ' + snakeLength;
-    }
+    };
 
     function transitionNextLevel(){
         var nextLevel = parseInt(this.level.substr(this.level.length-1))+1;
-        game.state.start('Level'+ nextLevel);
+        game.state.start('level'+ nextLevel);
     }
 
     function createWinText(level){
         level = level + 1;
         var winText = game.add.text(game.world.centerX, 250, 'You Win!',
-            {fill: "#ffffff", align: "center"});
+            {fill: textColor, align: "center"});
         winText.font = 'Arial Black';
         winText.fontSize = 50;
         winText.anchor.set(0.5);
 
         var description = game.add.text(game.world.centerX, 350, 'Next Level: '+level+
             '\nStarting in 3 seconds',
-            {fill: "#ffffff", align: "center"});
+            {fill: textColor, align: "center"});
         description.font = 'Arial';
         description.fontSize = 30;
         description.anchor.set(0.5);
     }
 
     function createLengthText(){
-        lengthText = game.add.text(game.world.centerX, 10, 'length: '+ snakeLength,
-            {fill: "#ffffff", align: "center"});
+        lengthText = game.add.text(game.world.centerX, 15, 'length: '+ snakeLength,
+            {fill: textColor, align: "center"});
         lengthText.font = 'Arial';
         lengthText.fontSize = 25;
-        lengthText.alpha = 0.8;
         lengthText.anchor.set(0.5);
     }
 
@@ -110,7 +112,7 @@ function MainState(game, speed, level, color, background){
             if (map.getTile(cherry.x/cherry.width, cherry.y/cherry.width)!==null || checkCherryOverlap()){
                 cherry.destroy();
             }
-        } while (map.getTile(cherry.x/cherry.width, cherry.y/cherry.width)!==null || checkCherryOverlap())
+        } while (map.getTile(cherry.x/cherry.width, cherry.y/cherry.width)!==null || checkCherryOverlap());
     }
 
     function checkCherryOverlap(){
@@ -118,7 +120,7 @@ function MainState(game, speed, level, color, background){
             if (checkOverlap(cherry, block)===true){
                 return true;
             }
-        })
+        });
         return false;
     }
 
@@ -208,23 +210,27 @@ function MainState(game, speed, level, color, background){
     }
 
 
-};
+}
 
 
 // menu state
 function MenuState(game){
 
     this.create = function(){
-        game.stage.backgroundColor = "#6688ee";
+        game.stage.backgroundColor = "#0B486B";
         var title = game.add.text(game.world.centerX, 250, 'PHASER\nSNAKE',
-            {fill: "#ffffff", align: "center"});
+            {fill: "#FE4365", align: "center"});
         title.font = 'Arial Black';
         title.fontSize = 50;
         title.fontWeight = "bold";
         title.anchor.set(0.5);
 
-        var description = game.add.text(game.world.centerX, 400, 'press UP key to start',
-            {fill: "#ffffff", align: "center"});
+        createSnakeGraphic();
+
+        var description = game.add.text(game.world.centerX, 400,
+            'press UP key to continue your progress\n'+
+            'press DOWN key to start over at level 1',
+            {fill: "#79BD9A", align: "center"});
         description.font = 'Arial';
         description.fontSize = 30;
         description.anchor.set(0.5);
@@ -235,21 +241,48 @@ function MenuState(game){
     this.update = function(){
         if (game.input.keyboard.isDown(Phaser.Keyboard.UP))
         {
-            startMain();
+            continueGame();
+        }
+        if (game.input.keyboard.isDown(Phaser.Keyboard.DOWN))
+        {
+            startNewGame();
         }
     };
-    function startMain(){
-        game.state.start('Level1');
+
+    function createSnakeGraphic(){
+        var graphics = game.add.graphics(0,0);
+        graphics.beginFill("0x"+"79BD9A");
+        graphics.drawRect(50, 50, 20, 150);
+        graphics.drawRect(50, 50, 670, 20);
+        graphics.drawRect(700, 50, 20, 500);
+        graphics.drawRect(80, 530, 620, 20);
+        graphics.drawRect(80, 480, 20, 50);
+        graphics.beginFill("0x" + "C02942");
+        graphics.drawRect(50, 230, 20, 20);
     }
 
-};
+    function continueGame(){
+        var level = localStorage.getItem('level');
+        if (level){
+            game.state.start(level);
+        }
+    }
+
+    function startNewGame(){
+        game.state.start('level1');
+    }
+}
 
 
 
-game.level1 = new MainState(game, 10, "level1", "yellow", "#aaaaaa");
-game.level2 = new MainState(game, 10, "level2", "lightBlue", "#6688ee")
-game.state.add('Level1', game.level1);
-game.state.add('Level2', game.level2);
+game.level1 = new MainState(game, 10, "level1", "#E4C8BC", "#B58E87");
+game.level2 = new MainState(game, 10, "level2", "#E0E4CC", "#F38630");
+game.level3 = new MainState(game, 10, "level3", "#3B8686", "#F9CDAD");
+game.level4 = new MainState(game, 10, "level4", "#542437", "#D95B43");
+game.state.add('level1', game.level1);
+game.state.add('level2', game.level2);
+game.state.add('level3', game.level3);
+game.state.add('level4', game.level4);
 game.state.add('MenuState', MenuState);
 
 

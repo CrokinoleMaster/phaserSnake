@@ -20,11 +20,11 @@
  "tilesets":[
         {
          "firstgid":1,
-         "image":"level2.png",
+         "image":"lightBlue.png",
          "imageheight":20,
          "imagewidth":20,
          "margin":0,
-         "name":"wall",
+         "name":"lightBlue",
          "properties":
             {
 
