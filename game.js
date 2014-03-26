@@ -4,6 +4,7 @@ var game = new Phaser.Game(800, 600, Phaser.CANVAS, '',
 
 // main state
 function MainState(game, speed, level, background, textColor) {
+    var currentState = this;
     var moveDone = false;
     var cursors;
     var snake=[];
@@ -227,9 +228,13 @@ function MenuState(game){
 
         createSnakeGraphic();
 
-        var description = game.add.text(game.world.centerX, 400,
-            'press UP key to continue your progress\n'+
-            'press DOWN key to start over at level 1',
+        var previousLevel = localStorage.getItem('level');
+        var message = 'press UP key to continue your progress\n'+
+            'press DOWN key to start over at level 1\n';
+        if (previousLevel){
+            message+= '\nprevious level: '+ previousLevel.substr(previousLevel.length-1);
+        }
+        var description = game.add.text(game.world.centerX, 400, message,
             {fill: "#79BD9A", align: "center"});
         description.font = 'Arial';
         description.fontSize = 30;
