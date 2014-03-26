@@ -2,8 +2,7 @@ phaserSnake
 ===========
 
 Trying phaserjs with this simple snake game  
-WORK IN PROGRESS  
-  
+
 Features
 --------
  
