@@ -294,6 +294,9 @@ function MenuState(game){
         if (previousLevel){
             message+= '\n\nprevious level: '+ previousLevel.substr(5);
         }
+        else {
+            message+= '\n\n';
+        }
         var description = game.add.text(game.world.centerX, 400, message,
             {fill: "#79BD9A", align: "center"});
         description.font = 'Arial';
