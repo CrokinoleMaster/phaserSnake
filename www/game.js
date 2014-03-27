@@ -493,23 +493,46 @@ game.state.add('MenuState', MenuState);
 
 // game functions
 function preload(){
-        game.load.image('block', 'assets/block.png');
-        game.load.image('cherry', 'assets/cherry.png');
-        game.load.audio('eat', 'assets/sounds/eat.wav');
-        game.load.audio('die', 'assets/sounds/die.wav');
-        game.load.audio('select', 'assets/sounds/select.wav');
-        game.load.audio('commit', 'assets/sounds/commit.wav');
-        game.load.audio('move', 'assets/sounds/move.wav');
-        game.load.audio('win', 'assets/sounds/win.wav');
+    game.ready = false;
+    game.stage.backgroundColor = "#0B486B";
+    var graphics = game.add.graphics(0,0);
+    graphics.beginFill("0x"+"79BD9A");
+    graphics.drawRect(50, 50, 20, 150);
+    graphics.drawRect(50, 50, 670, 20);
+    graphics.drawRect(700, 50, 20, 500);
+    graphics.drawRect(80, 530, 620, 20);
+    graphics.drawRect(80, 480, 20, 50);
+    graphics.beginFill("0x" + "C02942");
+    graphics.drawRect(50, 230, 20, 20);
+
+    var title = game.add.text(game.world.centerX, 230, 'LOADING...',
+        {fill: "#FE4365", align: "center"});
+    title.font = 'Arial Black';
+    title.fontSize = 50;
+    title.fontWeight = "bold";
+    title.anchor.set(0.5);
+
+    game.load.image('block', 'assets/block.png');
+    game.load.image('cherry', 'assets/cherry.png');
+    game.load.audio('eat', 'assets/sounds/eat.wav');
+    game.load.audio('die', 'assets/sounds/die.wav');
+    game.load.audio('select', 'assets/sounds/select.wav');
+    game.load.audio('commit', 'assets/sounds/commit.wav');
+    game.load.audio('move', 'assets/sounds/move.wav');
+    game.load.audio('win', 'assets/sounds/win.wav');
 }
 function create(){
 
-    game.state.start('MenuState');
+
 }
 
 
 
 function update(){
+    if (game.ready === false){
+        game.state.start('MenuState');
+        game.ready = true;
+    }
 
 }
 
