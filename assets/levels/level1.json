@@ -16,13 +16,13 @@
     {
 
     },
- "tileheight":20,
+ "tileheight":40,
  "tilesets":[
         {
          "firstgid":1,
          "image":"level1.png",
-         "imageheight":20,
-         "imagewidth":20,
+         "imageheight":40,
+         "imagewidth":40,
          "margin":0,
          "name":"wall",
          "properties":
@@ -30,10 +30,10 @@
 
             },
          "spacing":0,
-         "tileheight":20,
-         "tilewidth":20
+         "tileheight":40,
+         "tilewidth":40
         }],
- "tilewidth":20,
+ "tilewidth":40,
  "version":1,
  "width":40
 }
