@@ -14,7 +14,7 @@ function MainState(game, speed, level, background, textColor) {
     var layer;
     var snakeLength;
     var lengthText;
-    var lengthToWin = 6;
+    var lengthToWin = 20;
     var eatSound;
     var dieSound;
     var moveSound;
@@ -507,10 +507,10 @@ function preload(){
     graphics.beginFill("0x" + "C02942");
     graphics.drawRect(100, 460, 40, 40);
 
-    var title = game.add.text(game.world.centerX, 230, 'LOADING...',
+    var title = game.add.text(game.world.centerX, 460, 'LOADING...',
         {fill: "#FE4365", align: "center"});
     title.font = 'Arial Black';
-    title.fontSize = 50;
+    title.fontSize = 100;
     title.fontWeight = "bold";
     title.anchor.set(0.5);
 
