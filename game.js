@@ -493,6 +493,7 @@ game.state.add('MenuState', MenuState);
 
 // game functions
 function preload(){
+    screenResize();
     game.ready = false;
     game.stage.backgroundColor = "#0B486B";
     var graphics = game.add.graphics(0,0);
@@ -524,7 +525,7 @@ function preload(){
 
 function create(){
 
-    screenResize();
+
     window.addEventListener('resize', function(event){
         screenResize();
     });
@@ -546,6 +547,7 @@ function update(){
         game.state.start('MenuState');
         game.ready = true;
     }
+
 }
 
 
