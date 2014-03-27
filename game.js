@@ -1,6 +1,6 @@
 
-var game = new Phaser.Game(800, 600, Phaser.AUTO, "snake",
-    { preload: preload, create: create, update: update });
+var game = new Phaser.Game(800, 600, Phaser.CANVAS, "snake",
+    { preload: preload, create: create, update: update }, false, false);
 
 // main state
 function MainState(game, speed, level, background, textColor) {
@@ -521,9 +521,22 @@ function preload(){
     game.load.audio('move', 'assets/sounds/move.wav');
     game.load.audio('win', 'assets/sounds/win.wav');
 }
+
 function create(){
 
+    screenResize();
+    window.addEventListener('resize', function(event){
+        screenResize();
+    });
+}
 
+function screenResize(){
+     // screen scaling
+    Phaser.Canvas.setSmoothingEnabled(game.context, false);
+    game.scale.setShowAll();
+    game.scale.pageAlignHorizontally = true;
+    game.scale.pageAlignVeritcally = true;
+    game.scale.refresh();
 }
 
 
