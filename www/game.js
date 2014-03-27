@@ -1,5 +1,5 @@
 
-var game = new Phaser.Game(800, 600, Phaser.CANVAS, "snake",
+var game = new Phaser.Game(1600, 1200, Phaser.CANVAS, "snake",
     { preload: preload, create: create, update: update }, false, false);
 
 // main state
@@ -14,7 +14,7 @@ function MainState(game, speed, level, background, textColor) {
     var layer;
     var snakeLength;
     var lengthText;
-    var lengthToWin = 20;
+    var lengthToWin = 6;
     var eatSound;
     var dieSound;
     var moveSound;
@@ -41,7 +41,7 @@ function MainState(game, speed, level, background, textColor) {
         winSound = game.add.audio('win');
 
         game.stage.backgroundColor = this.background;
-        head = game.add.sprite(200, 0, 'block');
+        head = game.add.sprite(400, 0, 'block');
         snake.push(head);
         snakeInit(4);
         snakeLength = 5;
@@ -82,19 +82,19 @@ function MainState(game, speed, level, background, textColor) {
             graphics.beginFill("0x"+this.background.substr(1), 1);
             graphics.drawRect(0, 0, game.width, game.height);
 
-            var winText = game.add.text(game.world.centerX, 250, 'FIN!',
+            var winText = game.add.text(game.world.centerX, 500, 'FIN!',
                 {fill: textColor, align: "center"});
             winText.font = 'Arial Black';
-            winText.fontSize = 50;
+            winText.fontSize = 100;
             winText.anchor.set(0.5);
 
-            var description = game.add.text(game.world.centerX, 350, 'THANK YOU!\n'+
+            var description = game.add.text(game.world.centerX, 700, 'THANK YOU!\n'+
                 'You have completely completed my game\n'+
                 'I did not think anyone would actually spend this much time on it.\n'+
-                'Perhaps try it on Python Speed?? : )',
+                'Perhaps try it on Python Speed??\n : )',
                 {fill: textColor, align: "center"});
             description.font = 'Arial';
-            description.fontSize = 25;
+            description.fontSize = 50;
             description.anchor.set(0.5);
             currentState.loss = true;
 
@@ -123,25 +123,25 @@ function MainState(game, speed, level, background, textColor) {
 
     function createWinText(level){
         level = level + 1;
-        var winText = game.add.text(game.world.centerX, 250, 'You Win!',
+        var winText = game.add.text(game.world.centerX, 500, 'You Win!',
             {fill: textColor, align: "center"});
         winText.font = 'Arial Black';
-        winText.fontSize = 50;
+        winText.fontSize = 100;
         winText.anchor.set(0.5);
 
-        var description = game.add.text(game.world.centerX, 350, 'Next Level: '+level+
+        var description = game.add.text(game.world.centerX, 700, 'Next Level: '+level+
             '\nStarting in 3 seconds',
             {fill: textColor, align: "center"});
         description.font = 'Arial';
-        description.fontSize = 30;
+        description.fontSize = 60;
         description.anchor.set(0.5);
     }
 
     function createLengthText(){
-        lengthText = game.add.text(game.world.centerX, 15, 'length: '+ snakeLength,
+        lengthText = game.add.text(game.world.centerX, 30, 'length: '+ snakeLength,
             {fill: textColor, align: "center"});
         lengthText.font = 'Arial';
-        lengthText.fontSize = 25;
+        lengthText.fontSize = 50;
         lengthText.anchor.set(0.5);
     }
 
@@ -187,7 +187,7 @@ function MainState(game, speed, level, background, textColor) {
 
     function snakeInit(length){
         for (var i = 1; i < length; i++){
-            var b = game.add.sprite(200-snake[0].width*i, 0, 'block');
+            var b = game.add.sprite(400-snake[0].width*i, 0, 'block');
             snake.push(b);
         }
     }
@@ -236,16 +236,16 @@ function MainState(game, speed, level, background, textColor) {
         graphics.beginFill("0x"+currentState.background.substr(1), 0.8);
         graphics.drawRect(0, 0, game.width, game.height);
 
-        var lossText = game.add.text(game.world.centerX, 250, 'You Died!',
+        var lossText = game.add.text(game.world.centerX, 500, 'You Died!',
             {fill: textColor, align: "center"});
         lossText.font = 'Arial Black';
-        lossText.fontSize = 50;
+        lossText.fontSize = 100;
         lossText.anchor.set(0.5);
 
-        var description = game.add.text(game.world.centerX, 350, 'Returning to menu in 3 seconds',
+        var description = game.add.text(game.world.centerX, 700, 'Returning to menu in 3 seconds',
             {fill: textColor, align: "center"});
         description.font = 'Arial';
-        description.fontSize = 30;
+        description.fontSize = 60;
         description.anchor.set(0.5);
 
         game.time.events.add(Phaser.Timer.SECOND * 3, transitionMenu, currentState);
@@ -304,10 +304,10 @@ function MenuState(game){
         commitSound = game.add.audio('commit');
 
         game.stage.backgroundColor = "#0B486B";
-        var title = game.add.text(game.world.centerX, 230, 'PHASER\nSNAKE',
+        var title = game.add.text(game.world.centerX, 460, 'PHASER\nSNAKE',
             {fill: "#FE4365", align: "center"});
         title.font = 'Arial Black';
-        title.fontSize = 50;
+        title.fontSize = 100;
         title.fontWeight = "bold";
         title.anchor.set(0.5);
 
@@ -323,10 +323,10 @@ function MenuState(game){
         else {
             message+= '\n\n';
         }
-        var description = game.add.text(game.world.centerX, 400, message,
+        var description = game.add.text(game.world.centerX, 800, message,
             {fill: "#79BD9A", align: "center"});
         description.font = 'Arial';
-        description.fontSize = 30;
+        description.fontSize = 60;
         description.anchor.set(0.5);
 
         createSpeedText();
@@ -393,35 +393,35 @@ function MenuState(game){
     }
 
     function createSpeedText(){
-        worm = game.add.text(game.world.centerX-200, 435, "WORM",
+        worm = game.add.text(game.world.centerX-400, 870, "WORM",
             {fill: "#79BD9A", align: "center"});
         worm.font = 'Arial Black';
-        worm.fontSize = 25;
+        worm.fontSize = 50;
         worm.anchor.set(0.5);
 
-        snake = game.add.text(game.world.centerX, 435, "SNAKE",
+        snake = game.add.text(game.world.centerX, 870, "SNAKE",
             {fill: "#FE4365", align: "center"});
         snake.font = 'Arial Black';
-        snake.fontSize = 25;
+        snake.fontSize = 50;
         snake.anchor.set(0.5);
 
-        python = game.add.text(game.world.centerX+200, 435, "PYTHON",
+        python = game.add.text(game.world.centerX+400, 870, "PYTHON",
             {fill: "#79BD9A", align: "center"});
         python.font = 'Arial Black';
-        python.fontSize = 25;
+        python.fontSize = 50;
         python.anchor.set(0.5);
     }
 
     function createSnakeGraphic(){
         var graphics = game.add.graphics(0,0);
         graphics.beginFill("0x"+"79BD9A");
-        graphics.drawRect(50, 50, 20, 150);
-        graphics.drawRect(50, 50, 670, 20);
-        graphics.drawRect(700, 50, 20, 500);
-        graphics.drawRect(80, 530, 620, 20);
-        graphics.drawRect(80, 480, 20, 50);
+        graphics.drawRect(100, 100, 40, 300);
+        graphics.drawRect(100, 100, 1340, 40);
+        graphics.drawRect(1400, 100, 40, 1000);
+        graphics.drawRect(160, 1060, 1240, 40);
+        graphics.drawRect(160, 960, 40, 100);
         graphics.beginFill("0x" + "C02942");
-        graphics.drawRect(50, 230, 20, 20);
+        graphics.drawRect(100, 460, 40, 40);
     }
 
     function continueGame(){
@@ -493,18 +493,19 @@ game.state.add('MenuState', MenuState);
 
 // game functions
 function preload(){
+    game.stage.smoothed = false;
     screenResize();
     game.ready = false;
     game.stage.backgroundColor = "#0B486B";
     var graphics = game.add.graphics(0,0);
     graphics.beginFill("0x"+"79BD9A");
-    graphics.drawRect(50, 50, 20, 150);
-    graphics.drawRect(50, 50, 670, 20);
-    graphics.drawRect(700, 50, 20, 500);
-    graphics.drawRect(80, 530, 620, 20);
-    graphics.drawRect(80, 480, 20, 50);
+    graphics.drawRect(100, 100, 40, 300);
+    graphics.drawRect(100, 100, 1340, 40);
+    graphics.drawRect(1400, 100, 40, 1000);
+    graphics.drawRect(160, 1060, 1240, 40);
+    graphics.drawRect(160, 960, 40, 100);
     graphics.beginFill("0x" + "C02942");
-    graphics.drawRect(50, 230, 20, 20);
+    graphics.drawRect(100, 460, 40, 40);
 
     var title = game.add.text(game.world.centerX, 230, 'LOADING...',
         {fill: "#FE4365", align: "center"});

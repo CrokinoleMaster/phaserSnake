@@ -20,7 +20,7 @@
  "tilesets":[
         {
          "firstgid":1,
-         "image":"lightBlue (copy).png",
+         "image":"level3.png",
          "imageheight":20,
          "imagewidth":20,
          "margin":0,
