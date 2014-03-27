@@ -546,7 +546,6 @@ function update(){
         game.state.start('MenuState');
         game.ready = true;
     }
-
 }
 
 
