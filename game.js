@@ -15,14 +15,17 @@ function MainState(game, speed, level, background, textColor) {
     var snakeLength;
     var lengthText;
     var lengthToWin = 20;
+    var eatSound;
+    var dieSound;
+    var moveSound;
+    var winSound;
+    var collided = false;
     this.loss = false;
     this.level = level;
     this.speed = speed;
     this.background = background;
 
     this.preload = function(){
-        game.load.image('block', 'assets/block.png');
-        game.load.image('cherry', 'assets/cherry.png');
         game.load.tilemap(level, "assets/levels/"+level+".json", null, Phaser.Tilemap.TILED_JSON);
         game.load.image("tiles", "assets/levels/"+level+".png", 20, 20);
     };
@@ -32,6 +35,10 @@ function MainState(game, speed, level, background, textColor) {
         map.addTilesetImage("wall", "tiles");
         layer = map.createLayer("walls");
         layer.resizeWorld();
+        eatSound = game.add.audio('eat');
+        dieSound = game.add.audio('die');
+        moveSound = game.add.audio('move');
+        winSound = game.add.audio('win');
 
         game.stage.backgroundColor = this.background;
         head = game.add.sprite(200, 0, 'block');
@@ -55,23 +62,24 @@ function MainState(game, speed, level, background, textColor) {
             handleCursors();
         }
         if (snakeLength === lengthToWin && this.loss === false && this.level !== 'level10'){
-            console.log('win');
+            winSound.play();
             var level = parseInt(this.level.substr(5));
             var nextLevel = level+1;
             var graphics = game.add.graphics(0,0);
-            graphics.beginFill("0x"+this.background.substr(1), 0.2);
+            graphics.beginFill("0x"+this.background.substr(1), 0.8);
             graphics.drawRect(0, 0, game.width, game.height);
 
             window.localStorage.setItem('level', 'level'+nextLevel);
             createWinText(level);
             game.time.events.add(Phaser.Timer.SECOND * 3, transitionNextLevel, this);
+            currentState.loss = true;
 
             return;
         }
         if (snakeLength === lengthToWin && this.loss === false && this.level === 'level10'){
-            console.log('FIN');
+            winSound.play();
             var graphics = game.add.graphics(0,0);
-            graphics.beginFill("0x"+this.background.substr(1), 0.2);
+            graphics.beginFill("0x"+this.background.substr(1), 1);
             graphics.drawRect(0, 0, game.width, game.height);
 
             var winText = game.add.text(game.world.centerX, 250, 'FIN!',
@@ -88,6 +96,7 @@ function MainState(game, speed, level, background, textColor) {
             description.font = 'Arial';
             description.fontSize = 25;
             description.anchor.set(0.5);
+            currentState.loss = true;
 
             game.time.events.add(Phaser.Timer.SECOND * 10, transitionMenu, this);
 
@@ -104,6 +113,10 @@ function MainState(game, speed, level, background, textColor) {
     };
 
     function transitionNextLevel(){
+        snake = [];
+        direction = 1;
+        currentState.loss = false;
+        snakeLength = 5;
         var nextLevel = parseInt(this.level.substr(this.level.length-1))+1;
         game.state.start('level'+ nextLevel);
     }
@@ -168,6 +181,8 @@ function MainState(game, speed, level, background, textColor) {
         b = game.add.sprite(tail.x, tail.y, 'block');
         snake.push(b);
         snakeLength+=1;
+        if (lengthToWin!==snakeLength)
+            eatSound.play();
     }
 
     function snakeInit(length){
@@ -194,30 +209,31 @@ function MainState(game, speed, level, background, textColor) {
     }
 
     function detectCollision(){
-        var collided = false;
         snake.slice(1).forEach(function(block){
-            if (collided === false){
+            if (currentState.loss === false){
                 if (checkOverlap(snake[0], block)){
                     showGG();
-                    collided = true;
+                    currentState.loss = true;
                 }
             }
         });
-        if (collided === false){
+        if (currentState.loss === false){
             if (map.getTile(snake[0].x/snake[0].width, snake[0].y/snake[0].width)!==null){
                 showGG();
-                collided = true;
+                currentState.loss = true;
             }
             else if (snake[0].x < 0 || snake[0].y < 0 || snake[0].x >= game.world.width || snake[0].y >= game.world.height){
                 showGG();
+                currentState.loss = true;
             }
         }
     }
 
     function showGG(){
+        dieSound.play();
         currentState.loss = true;
         var graphics = game.add.graphics(0,0);
-        graphics.beginFill("0x"+currentState.background.substr(1), 0.2);
+        graphics.beginFill("0x"+currentState.background.substr(1), 0.8);
         graphics.drawRect(0, 0, game.width, game.height);
 
         var lossText = game.add.text(game.world.centerX, 250, 'You Died!',
@@ -239,11 +255,13 @@ function MainState(game, speed, level, background, textColor) {
         snake = [];
         direction = 1;
         currentState.loss = false;
+        snakeLength = 5;
         game.state.start('MenuState');
     }
 
 
     function handleCursors(){
+        var oldDir = direction;
         if (cursors.right.isDown && direction!== 3){
             direction = 1;
             moveDone = false;
@@ -260,6 +278,9 @@ function MainState(game, speed, level, background, textColor) {
             direction = 4;
             moveDone = false;
         }
+        if (direction!== oldDir){
+            moveSound.play();
+        }
     }
 
 
@@ -275,8 +296,13 @@ function MenuState(game){
     var speedSelected = 2;
     var left;
     var right;
+    var selectSound;
+    var commitSound;
 
     this.create = function(){
+        selectSound = game.add.audio('select');
+        commitSound = game.add.audio('commit');
+
         game.stage.backgroundColor = "#0B486B";
         var title = game.add.text(game.world.centerX, 230, 'PHASER\nSNAKE',
             {fill: "#FE4365", align: "center"});
@@ -309,14 +335,19 @@ function MenuState(game){
         left = game.input.keyboard.addKey(Phaser.Keyboard.LEFT);
         right = game.input.keyboard.addKey(Phaser.Keyboard.RIGHT);
         left.onDown.add(function(){
-            if (speedSelected > 1)
+            if (speedSelected > 1){
+                selectSound.play();
                 speedSelected-=1;
+            }
         }, this);
         right.onDown.add(function(){
-            if (speedSelected < 3)
+            if (speedSelected < 3){
+                selectSound.play();
                 speedSelected+=1;
+            }
         }, this);
 
+        commitSound.play();
     };
 
     this.update = function(){
@@ -350,6 +381,7 @@ function MenuState(game){
         }
         if (game.input.keyboard.isDown(Phaser.Keyboard.DOWN))
         {
+            commitSound.play();
             startNewGame();
         }
     };
@@ -396,6 +428,7 @@ function MenuState(game){
         var level = localStorage.getItem('level');
         createLevelInstances();
         if (level){
+            commitSound.play();
             game.state.start(level);
         }
     }
@@ -460,7 +493,14 @@ game.state.add('MenuState', MenuState);
 
 // game functions
 function preload(){
-
+        game.load.image('block', 'assets/block.png');
+        game.load.image('cherry', 'assets/cherry.png');
+        game.load.audio('eat', 'assets/sounds/eat.wav');
+        game.load.audio('die', 'assets/sounds/die.wav');
+        game.load.audio('select', 'assets/sounds/select.wav');
+        game.load.audio('commit', 'assets/sounds/commit.wav');
+        game.load.audio('move', 'assets/sounds/move.wav');
+        game.load.audio('win', 'assets/sounds/win.wav');
 }
 function create(){
 
